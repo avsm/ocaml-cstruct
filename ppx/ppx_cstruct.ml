@@ -14,18 +14,10 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *)
 
-open Migrate_parsetree
+open Ppxlib
 open Printf
 
-open Ast_404
-open Longident
-open Asttypes
-open Parsetree
-open Ast_helper
-open Ast_mapper
-module Loc = Location
-module Ast = Ast_convenience_404
-
+(*
 type mode = Big_endian | Little_endian | Host_endian | Bi_endian
 
 type prim =
@@ -518,7 +510,16 @@ let structure_item' mapper = function
 
 let structure mapper s =
   List.concat (List.map (structure_item' mapper) s)
+*)
+
+let pattern =
+  let open Ast_pattern in
+  pstr (pstr_type nonrecursive __)
+
+let struct_rule =
+   Extension.declare_inline "cstruct" Extension.Context.structure_item
+     pattern expand_struct
 
 let () =
-  Driver.register ~name:"ppx_cstruct" Versions.ocaml_404
-    (fun _config _cookies -> {default_mapper with structure; signature})
+  Ppxlib.Driver.register_transformation
+    ~rules:[struct_rule] "cstruct"
